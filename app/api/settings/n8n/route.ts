@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 
-const prisma = new PrismaClient()
+// Mock N8N credentials storage
+const mockCredentials: any = {
+  'mock-user-1': {
+    linkedinToken: 'mock-linkedin-token',
+    n8nWebhookUrl: 'https://n8n.example.com/webhook/linkedin',
+    n8nApiKey: 'mock-n8n-api-key',
+    isActive: true
+  }
+}
 
 // Get N8N credentials
 export async function GET(request: NextRequest) {
@@ -12,11 +19,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mock-secret-key') as any
 
-    const credentials = await prisma.n8NCredentials.findUnique({
-      where: { userId: decoded.userId }
-    })
+    const credentials = mockCredentials[decoded.userId]
 
     if (!credentials) {
       return NextResponse.json({
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mock-secret-key') as any
     const { linkedinToken, n8nWebhookUrl, n8nApiKey, isActive } = await request.json()
 
     if (!linkedinToken || !n8nWebhookUrl) {
@@ -68,28 +73,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const credentials = await prisma.n8NCredentials.upsert({
-      where: { userId: decoded.userId },
-      update: {
-        linkedinToken: linkedinToken !== '***masked***' ? linkedinToken : undefined,
-        n8nWebhookUrl,
-        n8nApiKey: n8nApiKey !== '***masked***' ? n8nApiKey : undefined,
-        isActive
-      },
-      create: {
-        userId: decoded.userId,
-        linkedinToken,
-        n8nWebhookUrl,
-        n8nApiKey: n8nApiKey || '',
-        isActive
-      }
-    })
+    // Mock: Save credentials
+    const currentCredentials = mockCredentials[decoded.userId] || {}
+    
+    mockCredentials[decoded.userId] = {
+      ...currentCredentials,
+      linkedinToken: linkedinToken !== '***masked***' ? linkedinToken : currentCredentials.linkedinToken,
+      n8nWebhookUrl,
+      n8nApiKey: n8nApiKey !== '***masked***' ? n8nApiKey : currentCredentials.n8nApiKey,
+      isActive
+    }
+
+    const savedCredentials = mockCredentials[decoded.userId]
 
     return NextResponse.json({
       linkedinToken: '***masked***',
-      n8nWebhookUrl: credentials.n8nWebhookUrl,
-      n8nApiKey: credentials.n8nApiKey ? '***masked***' : '',
-      isActive: credentials.isActive
+      n8nWebhookUrl: savedCredentials.n8nWebhookUrl,
+      n8nApiKey: savedCredentials.n8nApiKey ? '***masked***' : '',
+      isActive: savedCredentials.isActive
     })
 
   } catch (error) {
