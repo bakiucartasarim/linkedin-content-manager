@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    console.log('Login attempt:', { email, passwordLength: password?.length })
+
     if (!email || !password) {
       return NextResponse.json(
         { error: 'E-posta ve şifre gerekli' },
@@ -12,8 +14,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // JWT Secret kontrolü
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-development'
+    console.log('JWT Secret exists:', !!process.env.JWT_SECRET)
+
     // Mock: Test kullanıcısı kontrolü
     if (email === 'admin@test.com' && password === '123456') {
+      console.log('Admin login successful')
+      
       // Mock kullanıcı verisi
       const mockUser = {
         id: 'mock-user-1',
@@ -35,28 +43,35 @@ export async function POST(request: NextRequest) {
           email: mockUser.email,
           role: mockUser.role 
         },
-        process.env.JWT_SECRET || 'mock-secret-key',
+        jwtSecret,
         { expiresIn: '7d' }
       )
+
+      console.log('Token created successfully')
 
       // Response oluştur ve cookie set et
       const response = NextResponse.json({
         message: 'Giriş başarılı',
-        user: mockUser
+        user: mockUser,
+        redirectTo: '/dashboard' // Frontend'e yönlendirme bilgisi ekle
       })
 
       response.cookies.set('auth-token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 // 7 gün
+        maxAge: 7 * 24 * 60 * 60, // 7 gün
+        path: '/' // Path belirtilmeli
       })
 
+      console.log('Cookie set successfully')
       return response
     }
 
     // Başka herhangi bir e-posta ile giriş yapılırsa başarılı sayalım (demo için)
     if (password === 'demo123') {
+      console.log('Demo user login successful')
+      
       const mockUser = {
         id: 'mock-user-' + Date.now(),
         email,
@@ -76,26 +91,29 @@ export async function POST(request: NextRequest) {
           email: mockUser.email,
           role: mockUser.role 
         },
-        process.env.JWT_SECRET || 'mock-secret-key',
+        jwtSecret,
         { expiresIn: '7d' }
       )
 
       const response = NextResponse.json({
         message: 'Giriş başarılı',
-        user: mockUser
+        user: mockUser,
+        redirectTo: '/dashboard'
       })
 
       response.cookies.set('auth-token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60
+        maxAge: 7 * 24 * 60 * 60,
+        path: '/'
       })
 
       return response
     }
 
     // Geçersiz şifre
+    console.log('Invalid credentials')
     return NextResponse.json(
       { error: 'Geçersiz e-posta veya şifre' },
       { status: 401 }
