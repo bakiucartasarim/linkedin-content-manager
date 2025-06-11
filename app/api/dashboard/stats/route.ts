@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
-
-const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,39 +8,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mock-secret-key') as any
 
-    // Get stats for the user
-    const [totalPosts, scheduledPosts, publishedPosts, draftPosts] = await Promise.all([
-      prisma.post.count({
-        where: { userId: decoded.userId }
-      }),
-      prisma.post.count({
-        where: { 
-          userId: decoded.userId,
-          status: 'SCHEDULED'
-        }
-      }),
-      prisma.post.count({
-        where: { 
-          userId: decoded.userId,
-          status: 'PUBLISHED'
-        }
-      }),
-      prisma.post.count({
-        where: { 
-          userId: decoded.userId,
-          status: 'DRAFT'
-        }
-      })
-    ])
+    // Mock dashboard stats
+    const mockStats = {
+      totalPosts: 25,
+      scheduledPosts: 5,
+      publishedPosts: 18,
+      draftPosts: 2
+    }
 
-    return NextResponse.json({
-      totalPosts,
-      scheduledPosts,
-      publishedPosts,
-      draftPosts
-    })
+    return NextResponse.json(mockStats)
 
   } catch (error) {
     console.error('Dashboard stats error:', error)
