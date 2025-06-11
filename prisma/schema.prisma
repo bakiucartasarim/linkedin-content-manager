@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  password    String
+  role        Role     @default(USER)
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  credentials N8NCredentials?
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?  @unique
+  plan      Plan     @default(BASIC)
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("companies")
+}
+
+model N8NCredentials {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedinToken String
+  n8nWebhookUrl String
+  n8nApiKey    String?
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("n8n_credentials")
+}
+
+model Post {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      String?
+  imageUrl     String?
+  imagePrompt  String?
+  status       PostStatus  @default(DRAFT)
+  publishType  PublishType @default(IMMEDIATE)
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  linkedinPostId String?
+  suggestions  Json?       // Store AI suggestions history
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("posts")
+}
+
+enum Role {
+  USER
+  ADMIN
+  COMPANY_ADMIN
+}
+
+enum Plan {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum PostStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PUBLISHED
+  FAILED
+  SCHEDULED
+}
+
+enum PublishType {
+  IMMEDIATE
+  SCHEDULED
+}
