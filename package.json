@@ -13,7 +13,9 @@
     "db:studio": "prisma studio",
     "db:test": "node scripts/test-db.js",
     "db:setup": "prisma generate && prisma db push",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "db:admin": "node scripts/db-admin.js",
+    "db:view": "npm run db:admin"
   },
   "dependencies": {
     "next": "14.0.3",
