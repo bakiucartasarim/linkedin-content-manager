@@ -1,0 +1,22 @@
+# Coolify Health Check Configuration
+# Bu dosya Coolify'ın uygulamanızın sağlık durumunu kontrol etmesi için kullanılır
+
+# Health check endpoint
+HEALTHCHECK_ENDPOINT=/api/health
+
+# Health check interval (seconds)
+HEALTHCHECK_INTERVAL=30
+
+# Health check timeout (seconds)  
+HEALTHCHECK_TIMEOUT=10
+
+# Health check retries
+HEALTHCHECK_RETRIES=3
+
+# Build settings
+BUILD_COMMAND=npm install && npm run build
+START_COMMAND=npm start
+PORT=3000
+
+# Environment for deployment
+NODE_ENV=production
