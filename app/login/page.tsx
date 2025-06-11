@@ -35,7 +35,7 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        credentials: 'include' // Cookie'lerin gönderilmesi için
+        credentials: 'include'
       })
 
       console.log('API response status:', response.status)
@@ -43,15 +43,33 @@ export default function LoginPage() {
       console.log('API response data:', result)
 
       if (response.ok) {
-        toast.success('Giriş başarılı!')
+        toast.success('Giriş başarılı! Yönlendiriliyor...')
         
-        // Kısa bir bekleme sonrası yönlendir
-        setTimeout(() => {
-          console.log('Redirecting to dashboard...')
-          router.push('/dashboard')
-          // Alternatif yönlendirme
-          // window.location.href = '/dashboard'
-        }, 500)
+        console.log('Login successful, attempting redirect...')
+        
+        // Birden fazla yönlendirme yöntemi dene
+        try {
+          // Yöntem 1: window.location (en güvenilir)
+          console.log('Attempting window.location redirect...')
+          window.location.href = '/dashboard'
+          
+          // Yöntem 2: router.push (backup)
+          setTimeout(() => {
+            console.log('Attempting router.push redirect...')
+            router.push('/dashboard')
+          }, 500)
+          
+          // Yöntem 3: window.location.replace (backup)
+          setTimeout(() => {
+            console.log('Attempting window.location.replace redirect...')
+            window.location.replace('/dashboard')
+          }, 1000)
+          
+        } catch (navError) {
+          console.error('Navigation error:', navError)
+          // Manuel yönlendirme butonu göster
+          toast.error('Yönlendirme sorunu! Dashboard\'a manuel gidin.')
+        }
         
       } else {
         toast.error(result.error || 'Giriş yapılamadı')
@@ -84,6 +102,16 @@ export default function LoginPage() {
             <p className="font-medium mb-1">Demo hesapları:</p>
             <p>Email: admin@test.com | Şifre: 123456</p>
             <p>Herhangi bir email | Şifre: demo123</p>
+          </div>
+
+          {/* Manuel dashboard butonu - debug için */}
+          <div className="mt-4">
+            <Link 
+              href="/dashboard"
+              className="text-xs text-gray-500 hover:text-gray-700 underline"
+            >
+              Dashboard'a Manuel Git (Debug)
+            </Link>
           </div>
         </div>
 
@@ -127,6 +155,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   className="input pr-10"
                   placeholder="••••••••"
+                  defaultValue="123456"
                 />
                 <button
                   type="button"
@@ -172,6 +201,13 @@ export default function LoginPage() {
             </p>
           </div>
         </form>
+
+        {/* Debug bilgileri */}
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg text-xs text-gray-600">
+          <p className="font-medium mb-2">Debug Info:</p>
+          <p>Current URL: {typeof window !== 'undefined' ? window.location.href : 'Loading...'}</p>
+          <p>Cookies: {typeof document !== 'undefined' ? (document.cookie || 'None') : 'Loading...'}</p>
+        </div>
       </div>
     </div>
   )
