@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,64 +12,94 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Kullanıcıyı bul
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { company: true }
-    })
+    // Mock: Test kullanıcısı kontrolü
+    if (email === 'admin@test.com' && password === '123456') {
+      // Mock kullanıcı verisi
+      const mockUser = {
+        id: 'mock-user-1',
+        email: 'admin@test.com',
+        name: 'Test Admin',
+        role: 'ADMIN',
+        companyId: 'mock-company-1',
+        company: {
+          id: 'mock-company-1',
+          name: 'Test Şirketi',
+          domain: 'test.com'
+        }
+      }
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Geçersiz e-posta veya şifre' },
-        { status: 401 }
+      // JWT token oluştur
+      const token = jwt.sign(
+        { 
+          userId: mockUser.id, 
+          email: mockUser.email,
+          role: mockUser.role 
+        },
+        process.env.JWT_SECRET || 'mock-secret-key',
+        { expiresIn: '7d' }
       )
+
+      // Response oluştur ve cookie set et
+      const response = NextResponse.json({
+        message: 'Giriş başarılı',
+        user: mockUser
+      })
+
+      response.cookies.set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 // 7 gün
+      })
+
+      return response
     }
 
-    // Şifreyi kontrol et
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    // Başka herhangi bir e-posta ile giriş yapılırsa başarılı sayalım (demo için)
+    if (password === 'demo123') {
+      const mockUser = {
+        id: 'mock-user-' + Date.now(),
+        email,
+        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+        role: 'USER',
+        companyId: 'mock-company-1',
+        company: {
+          id: 'mock-company-1',
+          name: 'Demo Şirketi',
+          domain: email.split('@')[1]
+        }
+      }
 
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: 'Geçersiz e-posta veya şifre' },
-        { status: 401 }
+      const token = jwt.sign(
+        { 
+          userId: mockUser.id, 
+          email: mockUser.email,
+          role: mockUser.role 
+        },
+        process.env.JWT_SECRET || 'mock-secret-key',
+        { expiresIn: '7d' }
       )
+
+      const response = NextResponse.json({
+        message: 'Giriş başarılı',
+        user: mockUser
+      })
+
+      response.cookies.set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60
+      })
+
+      return response
     }
 
-    // JWT token oluştur
-    const token = jwt.sign(
-      { 
-        userId: user.id, 
-        email: user.email,
-        role: user.role 
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
+    // Geçersiz şifre
+    return NextResponse.json(
+      { error: 'Geçersiz e-posta veya şifre' },
+      { status: 401 }
     )
-
-    // Kullanıcı bilgilerini hazırla (şifreyi çıkar)
-    const userResponse = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      companyId: user.companyId,
-      company: user.company
-    }
-
-    // Response oluştur ve cookie set et
-    const response = NextResponse.json({
-      message: 'Giriş başarılı',
-      user: userResponse
-    })
-
-    response.cookies.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7 gün
-    })
-
-    return response
 
   } catch (error) {
     console.error('Login error:', error)
