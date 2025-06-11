@@ -3,8 +3,11 @@ import jwt from 'jsonwebtoken'
 
 export async function GET(request: NextRequest) {
   try {
+    // Cookie'den token'ı al
     const token = request.cookies.get('auth-token')?.value
-
+    
+    console.log('Auth me endpoint called, token exists:', !!token)
+    
     if (!token) {
       return NextResponse.json(
         { error: 'Token bulunamadı' },
@@ -12,30 +15,50 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Token'ı doğrula
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mock-secret-key') as any
-
-    // Mock kullanıcı verisi (token'dan bilgileri al)
-    const mockUser = {
-      id: decoded.userId,
-      email: decoded.email,
-      name: decoded.email === 'admin@test.com' ? 'Test Admin' : decoded.email.split('@')[0].charAt(0).toUpperCase() + decoded.email.split('@')[0].slice(1),
-      role: decoded.role,
-      companyId: 'mock-company-1',
-      company: {
-        id: 'mock-company-1',
-        name: decoded.email === 'admin@test.com' ? 'Test Şirketi' : 'Demo Şirketi',
-        domain: decoded.email.split('@')[1]
+    // JWT Secret
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-development'
+    
+    try {
+      // Token'ı doğrula
+      const payload = jwt.verify(token, jwtSecret) as any
+      console.log('Token verified successfully:', { userId: payload.userId })
+      
+      // Mock user data return et
+      const mockUser = {
+        id: payload.userId,
+        email: payload.email,
+        name: payload.email === 'admin@test.com' ? 'Test Admin' : payload.email.split('@')[0],
+        role: payload.role || 'USER',
+        companyId: 'mock-company-1',
+        company: {
+          id: 'mock-company-1',
+          name: payload.email === 'admin@test.com' ? 'Test Şirketi' : 'Demo Şirketi',
+          domain: payload.email.split('@')[1]
+        }
       }
+      
+      return NextResponse.json({
+        user: mockUser,
+        authenticated: true
+      })
+      
+    } catch (jwtError) {
+      console.error('Token verification failed:', jwtError)
+      
+      // Geçersiz token, cookie'yi temizle
+      const response = NextResponse.json(
+        { error: 'Geçersiz token' },
+        { status: 401 }
+      )
+      response.cookies.delete('auth-token')
+      return response
     }
-
-    return NextResponse.json(mockUser)
-
+    
   } catch (error) {
     console.error('Auth me error:', error)
     return NextResponse.json(
-      { error: 'Geçersiz token' },
-      { status: 401 }
+      { error: 'Sunucu hatası' },
+      { status: 500 }
     )
   }
 }
