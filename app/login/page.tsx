@@ -42,34 +42,15 @@ export default function LoginPage() {
       const result = await response.json()
       console.log('API response data:', result)
 
-      if (response.ok) {
-        toast.success('Giriş başarılı! Yönlendiriliyor...')
+      if (response.ok && result.success) {
+        toast.success('Giriş başarılı! Debug sayfasına yönlendiriliyor...')
         
-        console.log('Login successful, attempting redirect...')
+        console.log('Login successful, redirecting to debug page...')
         
-        // Birden fazla yönlendirme yöntemi dene
-        try {
-          // Yöntem 1: window.location (en güvenilir)
-          console.log('Attempting window.location redirect...')
-          window.location.href = '/dashboard'
-          
-          // Yöntem 2: router.push (backup)
-          setTimeout(() => {
-            console.log('Attempting router.push redirect...')
-            router.push('/dashboard')
-          }, 500)
-          
-          // Yöntem 3: window.location.replace (backup)
-          setTimeout(() => {
-            console.log('Attempting window.location.replace redirect...')
-            window.location.replace('/dashboard')
-          }, 1000)
-          
-        } catch (navError) {
-          console.error('Navigation error:', navError)
-          // Manuel yönlendirme butonu göster
-          toast.error('Yönlendirme sorunu! Dashboard\'a manuel gidin.')
-        }
+        // Debug sayfasına yönlendir
+        setTimeout(() => {
+          window.location.href = '/login-success'
+        }, 1000)
         
       } else {
         toast.error(result.error || 'Giriş yapılamadı')
@@ -104,14 +85,30 @@ export default function LoginPage() {
             <p>Herhangi bir email | Şifre: demo123</p>
           </div>
 
-          {/* Manuel dashboard butonu - debug için */}
-          <div className="mt-4">
-            <Link 
-              href="/dashboard"
-              className="text-xs text-gray-500 hover:text-gray-700 underline"
-            >
-              Dashboard'a Manuel Git (Debug)
-            </Link>
+          {/* Debug info */}
+          <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-700">
+            <p className="font-medium">🔧 Debug Mode Aktif</p>
+            <p>Giriş sonrası debug sayfasına yönlendirileceksiniz</p>
+          </div>
+
+          {/* Test links */}
+          <div className="mt-4 text-xs space-y-1">
+            <div>
+              <Link 
+                href="/login-success"
+                className="text-gray-500 hover:text-gray-700 underline"
+              >
+                Debug Sayfasını Test Et
+              </Link>
+            </div>
+            <div>
+              <Link 
+                href="/dashboard"
+                className="text-gray-500 hover:text-gray-700 underline"
+              >
+                Dashboard'ı Direkt Test Et
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -187,7 +184,7 @@ export default function LoginPage() {
                   Giriş yapılıyor...
                 </>
               ) : (
-                'Giriş Yap'
+                'Giriş Yap (Debug Mode)'
               )}
             </button>
           </div>
@@ -207,6 +204,7 @@ export default function LoginPage() {
           <p className="font-medium mb-2">Debug Info:</p>
           <p>Current URL: {typeof window !== 'undefined' ? window.location.href : 'Loading...'}</p>
           <p>Cookies: {typeof document !== 'undefined' ? (document.cookie || 'None') : 'Loading...'}</p>
+          <p>User Agent: {typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'Loading...'}</p>
         </div>
       </div>
     </div>
