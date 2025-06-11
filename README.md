@@ -9,227 +9,186 @@ Kurumsal firmalara yönelik LinkedIn içerik paylaşım ve otomasyon platformu. 
 - **N8N Otomasyonu**: Otomatik LinkedIn paylaşımları
 - **İçerik Planlama**: Zamanlanmış paylaşımlar
 - **Responsive Tasarım**: Mobil ve masaüstü uyumlu
+- **PostgreSQL Database**: Güvenli ve ölçeklenebilir veri depolama
 - **Coolify Ready**: Tek tıkla deployment
 
 ## 🛠️ Teknolojiler
 
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Backend**: Next.js API Routes, Prisma ORM
-- **Veritabanı**: PostgreSQL
+- **Veritabanı**: PostgreSQL (Bağlı ve Hazır! ✅)
 - **Styling**: Tailwind CSS
 - **Authentication**: JWT + Cookies
 - **Deployment**: Coolify, Docker
 
-## ⚡ Hızlı Başlangıç (Coolify)
+## ⚡ Hızlı Başlangıç
 
-### 1. Coolify'da Deploy Et
+### 🗄️ Database Hazır!
+PostgreSQL veritabanınız başarıyla projeye entegre edildi:
+- **Host**: xwgoc8gg0cg8cc48c0w4s8so:5432
+- **Database**: postgres
+- **Status**: ✅ Bağlı ve kullanıma hazır
 
-1. **Coolify Dashboard** > **Projects** > **+ Add**
-2. **GitHub Repository**: `https://github.com/bakiucartasarim/linkedin-content-manager`
-3. **Environment Variables** ayarla:
-   ```env
-   DATABASE_URL=postgres://user:pass@host:5432/db
-   NEXTAUTH_URL=https://yourdomain.com
-   NEXTAUTH_SECRET=your-secret-key
-   JWT_SECRET=your-jwt-secret
-   ```
-4. **Deploy** butonuna tıkla
+### 1. Yerel Geliştirme
 
-### 2. Database Migration
-
-Deploy sonrası terminal'de çalıştır:
 ```bash
-npx prisma generate
-npx prisma db push
-```
-
-**🎉 Tamamlandı!** Uygulamanız hazır.
-
-## 📋 Detaylı Kurulum
-
-### Coolify ile Kurulum
-Detaylı Coolify deployment rehberi için: **[COOLIFY-DEPLOYMENT.md](./COOLIFY-DEPLOYMENT.md)**
-
-### Manuel Kurulum
-
-#### 1. Depoyu Klonlayın
-```bash
+# Repository'yi klonla
 git clone https://github.com/bakiucartasarim/linkedin-content-manager.git
 cd linkedin-content-manager
-```
 
-#### 2. Bağımlılıkları Yükleyin
-```bash
+# Dependencies yükle
 npm install
-```
 
-#### 3. Environment Variables
-```bash
+# Environment ayarla
 cp .env.example .env
-```
+# .env dosyasındaki DATABASE_URL zaten ayarlı!
 
-`.env` dosyasını düzenleyin:
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/linkedin_content_manager"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
-JWT_SECRET="your-jwt-secret-here"
-```
+# Database bağlantısını test et
+npm run db:test
 
-#### 4. Veritabanını Kurun
-```bash
-npx prisma generate
-npx prisma db push
-```
+# Database schema oluştur
+npm run db:setup
 
-#### 5. Uygulamayı Çalıştırın
-```bash
+# Uygulamayı başlat
 npm run dev
 ```
 
-## 🗄️ PostgreSQL Ayarları
+### 2. Coolify ile Production Deploy
 
-### Veritabanı URL Formatı
-```
-postgres://kullanici:sifre@host:port/veritabani
-```
+1. **Coolify Dashboard** > **Projects** > **+ Add**
+2. **GitHub Repository**: `https://github.com/bakiucartasarim/linkedin-content-manager`
+3. **Environment Variables**:
+   ```env
+   DATABASE_URL=postgres://postgres:A9NFM3xAw29eSQPEXDpXNtGW2Y29c9bkaZEQpu713tAkhl4yFf3Vq53RZlsEvaMY@xwgoc8gg0cg8cc48c0w4s8so:5432/postgres
+   NEXTAUTH_URL=https://yourdomain.com
+   NEXTAUTH_SECRET=your-super-secret-key-32-chars
+   JWT_SECRET=your-jwt-secret-32-chars
+   ```
+4. **Deploy** butonuna tıkla
+5. Deploy sonrası migration çalıştır:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
 
-### Güvenlik Önerileri
-- Güçlü şifre kullanın (16+ karakter)
-- SSL bağlantısı aktifleştirin
-- Sadece gerekli IP'lerden erişim verin
-- Düzenli backup alın
+## 📋 Database Yönetimi
 
-Detaylı güvenlik rehberi: **[SECURITY.md](./SECURITY.md)**
-
-## 🐳 Docker ile Kurulum
-
+### Kullanışlı Komutlar
 ```bash
-# Docker Compose ile çalıştır
-docker-compose up -d
+# Database bağlantısını test et
+npm run db:test
 
-# Database migration
-docker-compose exec app npx prisma db push
+# Schema oluştur ve uygula
+npm run db:setup
+
+# Prisma Studio açtır (Database GUI)
+npm run db:studio
+
+# Health check
+curl http://localhost:3000/api/health
 ```
+
+### Database Schema
+Otomatik olarak oluşturulacak tablolar:
+- **users** - Kullanıcı bilgileri
+- **companies** - Şirket bilgileri  
+- **posts** - LinkedIn paylaşımları
+- **n8n_credentials** - N8N entegrasyon ayarları
+
+## 📚 Detaylı Dokümantasyon
+
+### 📖 Rehberler
+- **[Database Setup](./DATABASE-SETUP.md)** - PostgreSQL bağlantı detayları
+- **[Coolify Deployment](./COOLIFY-DEPLOYMENT.md)** - Production deployment
+- **[Güvenlik Rehberi](./SECURITY.md)** - Güvenlik en iyi pratikleri
+
+### 🔧 API Endpoints
+- `GET /api/health` - Sistem ve database durumu
+- `POST /api/auth/login` - Kullanıcı girişi
+- `POST /api/auth/register` - Kullanıcı kaydı
+- `POST /api/posts` - Yeni post oluşturma
+- `GET /api/posts` - Post listesi
 
 ## 🔧 N8N Entegrasyonu
 
-### 1. N8N Workflow Oluşturma
+### N8N Workflow Kurulumu
 1. N8N'de yeni workflow oluşturun
 2. Webhook trigger ekleyin
 3. LinkedIn node ekleyin
-4. Workflow'u aktifleştirin
+4. Environment variables'a N8N bilgilerini ekleyin:
+   ```env
+   N8N_API_URL="https://your-n8n-instance.com"
+   N8N_API_KEY="your-n8n-api-key"
+   ```
 
-### 2. Uygulama Ayarları
-```env
-N8N_API_URL="https://your-n8n-instance.com"
-N8N_API_KEY="your-n8n-api-key"
-```
+## 🌐 Production Checklist
 
-## 📚 Kullanım
+### ✅ Hazır Olanlar
+- [x] PostgreSQL database bağlantısı
+- [x] Prisma ORM konfigürasyonu
+- [x] Health check endpoint
+- [x] Coolify deployment konfigürasyonu
+- [x] Security best practices
+- [x] Database migration scripts
 
-### 1. Kayıt Olma
-- `/register` sayfasından kayıt olun
-- Şirket bilgilerinizi girin
-
-### 2. N8N Kurulumu
-- Dashboard > N8N Ayarları
-- LinkedIn token ve N8N URL'i girin
-
-### 3. İçerik Oluşturma
-- Dashboard > İçerik Oluştur
-- AI ile resim/metin oluşturun
-- Anında yayınlayın veya planlayın
-
-### 4. İçerik Yönetimi
-- Dashboard > Yayınlarım
-- Tüm içeriklerinizi görün ve yönetin
-
-## 🌐 Production Deployment
-
-### Coolify (Önerilen)
-- **Kolay Setup**: Tek tık deployment
-- **Auto SSL**: Let's Encrypt entegrasyonu
-- **Auto Backup**: Otomatik veritabanı yedekleme
-- **Monitoring**: Built-in log ve metrik takibi
-
-### Environment Variables (Production)
-```env
-DATABASE_URL=postgres://user:pass@host:5432/db
-NEXTAUTH_URL=https://yourdomain.com
-NEXTAUTH_SECRET=super-secret-32-chars-minimum
-JWT_SECRET=another-super-secret-32-chars
-```
-
-### Secret Key Oluşturma
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-## 🔐 Güvenlik
-
-- **JWT Authentication**: Güvenli token tabanlı giriş
-- **Password Hashing**: bcrypt ile şifre güvenliği
-- **HTTPS Only**: Production'da SSL zorunlu
-- **Environment Protection**: Hassas bilgiler .env'de
-
-⚠️ **Önemli**: `.env` dosyasını asla Git'e eklemeyin!
+### 🔄 Deploy Sonrası Yapılacaklar
+- [ ] Production domain ayarları
+- [ ] SSL sertifikası (Coolify otomatik)
+- [ ] N8N webhook konfigürasyonu
+- [ ] LinkedIn API credentials
+- [ ] Database backup stratejisi
 
 ## 📊 Özellikler
 
-### ✅ Mevcut Özellikler
-- [x] Kullanıcı kaydı ve girişi
-- [x] Şirket yönetimi
-- [x] İçerik oluşturma (metin/resim)
+### ✅ Mevcut
+- [x] **Database**: PostgreSQL bağlı ve hazır
+- [x] User management (kayıt/giriş)
+- [x] Company management
+- [x] Post creation ve yönetimi
 - [x] N8N webhook entegrasyonu
-- [x] LinkedIn otomatik paylaşım
-- [x] Responsive tasarım
-- [x] Coolify deployment
+- [x] Responsive design
+- [x] Health monitoring
 
-### 🚧 Gelecek Özellikler
+### 🚧 Geliştirme Aşamasında
 - [ ] AI görsel üretimi
 - [ ] İçerik takvimi
 - [ ] Analytics dashboard
 - [ ] Multi-platform support
-- [ ] Team collaboration
-- [ ] API documentation
+- [ ] Real-time notifications
 
-## 🤝 Katkıda Bulunma
+## 🔒 Güvenlik
 
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit edin (`git commit -m 'Add amazing feature'`)
-4. Push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
+- **Database**: Güçlü şifre koruması ✅
+- **Authentication**: JWT + bcrypt hash
+- **HTTPS**: Production'da SSL zorunlu
+- **Environment**: Hassas bilgiler .env'de
+- **Validation**: Input sanitization
 
 ## 📞 Destek
 
-### Dökümantasyon
-- [Coolify Deployment Rehberi](./COOLIFY-DEPLOYMENT.md)
-- [Güvenlik Rehberi](./SECURITY.md)
-- [API Dökümantasyonu](./API.md) *(yakında)*
+### 🆘 Sorun Giderme
+```bash
+# Database bağlantı testi
+npm run db:test
 
-### İletişim
-- **Issues**: [GitHub Issues](https://github.com/bakiucartasarim/linkedin-content-manager/issues)
-- **Email**: contact@yourcompany.com
-- **Discord**: [Community Server](https://discord.gg/your-server)
+# Health check
+curl http://localhost:3000/api/health
 
-## 📄 Lisans
+# Debug mode
+DEBUG=prisma:* npm run dev
+```
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](./LICENSE) dosyasını inceleyin.
+### 📧 İletişim
+- **GitHub Issues**: [Yeni sorun bildir](https://github.com/bakiucartasarim/linkedin-content-manager/issues)
+- **Database Sorunları**: `DATABASE-SETUP.md` dosyasını inceleyin
+- **Deployment Sorunları**: `COOLIFY-DEPLOYMENT.md` dosyasını inceleyin
 
-## 🏆 Katkıda Bulunanlar
+## 🏆 Teşekkürler
 
-<a href="https://github.com/bakiucartasarim/linkedin-content-manager/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=bakiucartasarim/linkedin-content-manager" />
-</a>
-
-## ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=bakiucartasarim/linkedin-content-manager&type=Date)](https://star-history.com/#bakiucartasarim/linkedin-content-manager&Date)
+Bu proje LinkedIn içerik üreticilerinin hayatını kolaylaştırmak için geliştirilmiştir. PostgreSQL entegrasyonu sayesinde güvenli ve ölçeklenebilir bir altyapıya sahiptir.
 
 ---
 
-**Made with ❤️ for the LinkedIn community**
+**🎉 Veritabanınız hazır! Artık deployment yapabilirsiniz.**
 
-> Bu proje LinkedIn içerik üreticilerinin hayatını kolaylaştırmak için geliştirilmiştir. Coolify ile deployment süreci minimal hale getirilmiştir.
+> PostgreSQL bağlantınız başarıyla yapılandırıldı. `npm run db:test` komutu ile test edebilir, `npm run db:setup` ile tabloları oluşturabilirsiniz.
