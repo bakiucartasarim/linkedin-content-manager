@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
       const response = NextResponse.json({
         message: 'Giriş başarılı',
         user: mockUser,
-        redirectTo: '/dashboard' // Frontend'e yönlendirme bilgisi ekle
+        redirectTo: '/login-success', // Debug sayfasına yönlendir
+        success: true
       })
 
       response.cookies.set('auth-token', token, {
@@ -98,7 +99,8 @@ export async function POST(request: NextRequest) {
       const response = NextResponse.json({
         message: 'Giriş başarılı',
         user: mockUser,
-        redirectTo: '/dashboard'
+        redirectTo: '/login-success', // Debug sayfasına yönlendir
+        success: true
       })
 
       response.cookies.set('auth-token', token, {
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest) {
         path: '/'
       })
 
+      console.log('Demo login successful, cookie set')
       return response
     }
 
