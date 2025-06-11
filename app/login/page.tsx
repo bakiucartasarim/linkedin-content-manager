@@ -25,6 +25,9 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
+    
+    console.log('Login form submitted:', { email: data.email })
+    
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -32,17 +35,30 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include' // Cookie'lerin gönderilmesi için
       })
 
+      console.log('API response status:', response.status)
       const result = await response.json()
+      console.log('API response data:', result)
 
       if (response.ok) {
         toast.success('Giriş başarılı!')
-        router.push('/dashboard')
+        
+        // Kısa bir bekleme sonrası yönlendir
+        setTimeout(() => {
+          console.log('Redirecting to dashboard...')
+          router.push('/dashboard')
+          // Alternatif yönlendirme
+          // window.location.href = '/dashboard'
+        }, 500)
+        
       } else {
         toast.error(result.error || 'Giriş yapılamadı')
+        console.error('Login failed:', result.error)
       }
     } catch (error) {
+      console.error('Login error:', error)
       toast.error('Bir hata oluştu')
     } finally {
       setIsLoading(false)
@@ -62,6 +78,13 @@ export default function LoginPage() {
           <p className="mt-2 text-gray-600">
             LinkedIn Content Manager hesabınıza giriş yapın
           </p>
+          
+          {/* Demo credentials info */}
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+            <p className="font-medium mb-1">Demo hesapları:</p>
+            <p>Email: admin@test.com | Şifre: 123456</p>
+            <p>Herhangi bir email | Şifre: demo123</p>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -80,7 +103,8 @@ export default function LoginPage() {
                 })}
                 type="email"
                 className="input mt-1"
-                placeholder="ornek@firma.com"
+                placeholder="admin@test.com"
+                defaultValue="admin@test.com"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
