@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
-
-const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,32 +13,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Token'ı doğrula
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'mock-secret-key') as any
 
-    // Kullanıcıyı bul
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      include: { company: true }
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Kullanıcı bulunamadı' },
-        { status: 404 }
-      )
+    // Mock kullanıcı verisi (token'dan bilgileri al)
+    const mockUser = {
+      id: decoded.userId,
+      email: decoded.email,
+      name: decoded.email === 'admin@test.com' ? 'Test Admin' : decoded.email.split('@')[0].charAt(0).toUpperCase() + decoded.email.split('@')[0].slice(1),
+      role: decoded.role,
+      companyId: 'mock-company-1',
+      company: {
+        id: 'mock-company-1',
+        name: decoded.email === 'admin@test.com' ? 'Test Şirketi' : 'Demo Şirketi',
+        domain: decoded.email.split('@')[1]
+      }
     }
 
-    // Kullanıcı bilgilerini hazırla (şifreyi çıkar)
-    const userResponse = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      companyId: user.companyId,
-      company: user.company
-    }
-
-    return NextResponse.json(userResponse)
+    return NextResponse.json(mockUser)
 
   } catch (error) {
     console.error('Auth me error:', error)
