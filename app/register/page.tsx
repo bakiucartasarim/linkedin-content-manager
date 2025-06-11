@@ -73,7 +73,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Hesap Oluşturun</h2>
           <p className="mt-2 text-gray-600">
-            LinkedIn Content Manager'a katılın
+            LinkedIn Content Manager&apos;a katılın
           </p>
         </div>
 
