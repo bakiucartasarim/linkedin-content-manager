@@ -11,8 +11,10 @@ export function middleware(request: NextRequest) {
   const publicPaths = [
     '/login', 
     '/register', 
+    '/login-success',  // Debug sayfası public
     '/api/auth/login', 
     '/api/auth/register',
+    '/api/auth/me',    // Auth check için
     '/api/health',
     '/',
     '/favicon.ico'
