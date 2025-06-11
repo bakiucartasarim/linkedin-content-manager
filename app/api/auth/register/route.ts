@@ -1,8 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,65 +11,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // E-posta kontrolü
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUser) {
+    // Mock: E-posta kontrolü (test@test.com zaten kullanılıyor gibi davran)
+    if (email === 'test@test.com') {
       return NextResponse.json(
         { error: 'Bu e-posta adresi zaten kullanılıyor' },
         { status: 400 }
       )
     }
 
-    // Şifreyi hashle
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Şirketi kontrol et veya oluştur
-    let company = null
-    if (companyDomain) {
-      company = await prisma.company.findUnique({
-        where: { domain: companyDomain }
-      })
-    }
-
-    if (!company) {
-      company = await prisma.company.create({
-        data: {
-          name: companyName,
-          domain: companyDomain || undefined
-        }
-      })
-    }
-
-    // Kullanıcıyı oluştur
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        companyId: company.id,
-        role: company.domain && companyDomain === company.domain ? 'COMPANY_ADMIN' : 'USER'
-      },
-      include: {
-        company: true
+    // Mock: Başarılı kayıt
+    const mockUser = {
+      id: 'mock-user-' + Date.now(),
+      email,
+      name,
+      role: 'USER',
+      companyId: 'mock-company-1',
+      company: {
+        id: 'mock-company-1',
+        name: companyName,
+        domain: companyDomain || null
       }
-    })
-
-    // Kullanıcı bilgilerini hazırla (şifreyi çıkar)
-    const userResponse = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      companyId: user.companyId,
-      company: user.company
     }
 
     return NextResponse.json({
       message: 'Hesap başarıyla oluşturuldu',
-      user: userResponse
+      user: mockUser
     })
 
   } catch (error) {
